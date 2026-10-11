@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 font-sans;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-display;
+}
+
+/* ==========================================
+   MODOS DE ACCESIBILIDAD POR PERFIL
+   ========================================== */
+
+/* --- MODO ALTO CONTRASTE (Auditivo) --- */
+body.eco-high-contrast {
+  @apply bg-black text-yellow-300;
+}
+body.eco-high-contrast * {
+  @apply border-yellow-300;
+}
+body.eco-high-contrast button:not([disabled]) {
+  @apply border-2 border-yellow-300;
+}
+body.eco-high-contrast input,
+body.eco-high-contrast select {
+  @apply bg-black text-yellow-300 border-yellow-300;
+}
+
+/* --- MODO OSCURO (Nocturno) --- */
+body.eco-dark-mode {
+  @apply bg-gray-950 text-amber-100;
+}
+body.eco-dark-mode .bg-white {
+  @apply bg-gray-900 !important;
+}
+body.eco-dark-mode .bg-gray-50 {
+  @apply bg-gray-950 !important;
+}
+body.eco-dark-mode .text-gray-800,
+body.eco-dark-mode .text-gray-700,
+body.eco-dark-mode .text-gray-600 {
+  @apply text-amber-100 !important;
+}
+body.eco-dark-mode .text-gray-400,
+body.eco-dark-mode .text-gray-500 {
+  @apply text-amber-300/60 !important;
+}
+body.eco-dark-mode .border-slate-100,
+body.eco-dark-mode .border-gray-200 {
+  @apply border-amber-900/30 !important;
+}
+body.eco-dark-mode .shadow-sm,
+body.eco-dark-mode .shadow-card {
+  @apply shadow-none !important;
+}
+body.eco-dark-mode * {
+  @apply border-amber-900/20;
+}
+
+/* --- MODO DISLEXIA (tipografía + fondo crema) --- */
+body.eco-dyslexic-font {
+  font-family: "OpenDyslexic", "Trebuchet MS", "Comic Sans MS", sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+}
+body.profile-dyslexia {
+  background-color: #fef9ef !important;
+}
+body.profile-dyslexia .bg-white {
+  background-color: #fffdf5 !important;
+}
+body.profile-dyslexia p {
+  line-height: 1.8 !important;
+  margin-bottom: 1.2em;
+}
+
+/* --- MODO ANIMACIONES REDUCIDAS (TEA, Motor, TDAH) --- */
+body.eco-reduced-animations * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+body.eco-reduced-animations canvas {
+  display: none !important; /* hide confetti */
+}
+
+/* --- PERFIL VISUAL: grid de pictogramas --- */
+body.profile-visual .content-paragraph {
+  display: none;
+}
+body.profile-visual .content-infographic {
+  display: grid;
+}
+body.profile-visual .quiz-option {
+  @apply text-center p-6 min-h-[100px] flex flex-col items-center justify-center gap-3;
+}
+body.profile-visual .quiz-option span:first-child {
+  @apply text-3xl;
+}
+
+/* --- PERFIL AUDITIVO: layout de lista vertical --- */
+body.profile-auditory main {
+  @apply max-w-2xl;
+}
+body.profile-auditory .course-card {
+  @apply flex-row items-center gap-6 py-6;
+}
+
+/* --- PERFIL MOTOR: botones gigantes --- */
+body.profile-motor button:not(.no-scale) {
+  @apply text-lg min-h-[60px] min-w-[60px];
+}
+body.profile-motor .quiz-option {
+  @apply text-xl py-6 px-8;
+}
+
+/* 3D perspective for flashcards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Shake animation for match game */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}

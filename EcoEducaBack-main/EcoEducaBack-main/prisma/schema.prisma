@@ -1,0 +1,164 @@
+// Prisma Schema - EcoEduca-AI
+// Hub de Estudio Adaptativo Inclusivo con Optimización Inteligente (SRS v2)
+// Motor: PostgreSQL 16 vía Docker (se mantiene Postgres+Docker de la infraestructura
+// ya establecida; el SRS original ejemplifica con SQLite, pero el stack de este
+// repositorio ya corre sobre Postgres en contenedores, ver ARCHITECTURE.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+// Perfil de accesibilidad - 10 perfiles para experiencias educativas diferenciadas
+enum AccessProfile {
+  STANDARD  // Educación regular - experiencia completa gamificada
+  VISUAL    // Sordera/hipoacusia/TEA - infografías y pictogramas
+  AUDITORY  // Ceguera/baja visión/dislexia - narración y comandos de voz
+  MOTOR     // Discapacidad motora - macro-botones, SÍ/NO, comandos de voz
+  DYSLEXIA  // Dislexia - tipografía especial, audio, fondo crema
+  ADHD      // TDAH - timer, micro-sesiones, recompensas frecuentes
+  AUTISM    // TEA - rutina predecible, pictogramas, sin sorpresas
+  ADVANCED  // Alto rendimiento - skip, contenido extra, mayor desafío
+  LANGUAGE  // Segunda lengua - vocabulario simple, apoyo visual
+  NIGHT     // Estudio nocturno - modo oscuro, brillo reducido
+}
+
+enum AnswerOption {
+  A
+  B
+  C
+}
+
+model User {
+  id            String        @id @default(cuid())
+  dni           String        @unique
+  password      String
+  fullName      String
+  role          Role
+  grade         String?
+  accessProfile AccessProfile @default(STANDARD)
+  disabilities  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  responses   QuizResponse[]
+  enrollments Enrollment[]
+  grades      Grade[]
+
+  @@map("users")
+}
+
+model Course {
+  id     String @id @default(cuid())
+  title  String
+  grade  String
+  topics Topic[]
+
+  enrollments Enrollment[]
+  grades      Grade[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  score     Float
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("grades")
+}
+
+model Topic {
+  id          String  @id @default(cuid())
+  courseId    String
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  summaryText String
+  order       Int     @default(1)
+  weekLabel   String?
+
+  sourceFileName   String?
+  contentUpdatedAt DateTime?
+  generatedByAI    Boolean   @default(false)
+
+  quizzes   Quiz[]
+  cachedAIs AICache[]
+
+  @@map("topics")
+}
+
+model Quiz {
+  id         String       @id @default(cuid())
+  topicId    String
+  topic      Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  question   String
+  optionA    String
+  optionB    String
+  optionC    String?
+  correctOpt AnswerOption
+  explanation String?
+
+  responses QuizResponse[]
+
+  @@map("quizzes")
+}
+
+model QuizResponse {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  selectedOpt AnswerOption
+  isCorrect   Boolean
+  modeUsed    AccessProfile
+  createdAt   DateTime     @default(now())
+
+  @@unique([userId, quizId])
+  @@map("quiz_responses")
+}
+
+model AICache {
+  id          String        @id @default(cuid())
+  topicId     String
+  topic       Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  profileType AccessProfile
+  aiContent   String
+  hitsCount   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([topicId, profileType])
+  @@map("ai_cache")
+}
